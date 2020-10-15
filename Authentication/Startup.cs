@@ -34,44 +34,21 @@ namespace Authentication
                         throw new ArgumentNullException(
                             "AuthoritySettings section is empty, invalid, or not present");
             services.AddScoped<IUserRepository, UserRepository>();
-            // .AddScoped<AuthoritySettings>(settings => authoritySettings);
             services.Configure<AuthoritySettings>(Configuration.GetSection("AuthoritySettings"));
 
             services.AddIdentityServer(options =>
             {
-                //options.Endpoints = new IdentityServer4.Configuration.EndpointsOptions
-                //{
-                //    EnableAuthorizeEndpoint = true,
-                //    EnableCheckSessionEndpoint = true,
-                //    EnableEndSessionEndpoint = true,
-                //    EnableUserInfoEndpoint = true,
-                //    EnableDiscoveryEndpoint = true
-                //    //EnableIntrospectionEndpoint = false,
-                //    //EnableTokenEndpoint = false,
-                //    //EnableTokenRevocationEndpoint = false
-                //};
-                
+
             })
-                //.AddDeveloperSigningCredential()
+
                 .AddSigningCredential(CertificateLoader.LoadFromStoreCert("Ws-PC-70", "Root", StoreLocation.LocalMachine, false))
                 .AddInMemoryApiResources(Config.GetApiResources())
                 .AddInMemoryApiScopes(Config.GetApiScopes())
                 .AddInMemoryIdentityResources(Config.GetIdentityResources())
                 .AddResourceOwnerValidator<ResourceOwnerPasswordValidator>()
                 .AddProfileService<ProfileService>()
-                .AddClientStore<ClientsStore>();
-
-            //services.ConfigureExternalCookie(options =>
-            //{
-            //    options.Cookie.IsEssential = true;
-            //    options.Cookie.SameSite = Microsoft.AspNetCore.Http.SameSiteMode.Lax;
-            //});
-
-            //services.ConfigureApplicationCookie(options =>
-            //{
-            //    options.Cookie.IsEssential = true;
-            //    options.Cookie.SameSite = Microsoft.AspNetCore.Http.SameSiteMode.Lax;
-            //});
+                .AddClientStore<ClientsStore>()
+                .AddJwtBearerClientAuthentication();
 
             services.AddAuthentication()
                 .AddJwtBearer(jwt =>
@@ -80,15 +57,12 @@ namespace Authentication
                    jwt.TokenValidationParameters.ValidateAudience = true;
                    jwt.SaveToken = true;
                });
-                //.AddCookie(IdentityConstants.ApplicationScheme, options =>
-                //{
-                //    options.SlidingExpiration = true;
-                //});
+
             services.AddCors(options =>
             {
                 options.AddPolicy("CorsPolicy",
                     builder => builder
-                        .WithOrigins(new[] {"https://ws-pc-70:5001" })
+                        .WithOrigins(new[] {authoritySettings.DefaultRedirectUri })
                         .WithHeaders("*")
                         .WithMethods("*")
                         .AllowCredentials());

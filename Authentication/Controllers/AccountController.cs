@@ -371,16 +371,10 @@ namespace Authentication.Controllers
             };
         }
 
-        [ProducesResponseType(typeof(string), 200)]
-        [ProducesResponseType(typeof(string), 404)]
-        [ProducesResponseType(typeof(string), 400)]
-        [ProducesResponseType(typeof(string), 500)]
-        [HttpGet]
-        public async Task<IActionResult> SignOut()
-        {
+
 
             //await HttpContext.SignOutAsync();
-            return Redirect("https://ws-pc-70:5005");
+           //return Redirect("https://ws-pc-70:5005");
 
             //HttpClient httpClient = new HttpClient();
             //var task =  await httpClient.GetDiscoveryDocumentAsync(_authoritySettings.AuthorityApiEndpoint);
@@ -403,7 +397,7 @@ namespace Authentication.Controllers
             //httpClient2.SetBearerToken(resp.AccessToken);
 
 
-        }
+
 
        
 
