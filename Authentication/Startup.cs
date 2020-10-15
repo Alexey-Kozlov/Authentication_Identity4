@@ -33,8 +33,9 @@ namespace Authentication
             var authoritySettings = Configuration.GetSection("AuthoritySettings").Get<AuthoritySettings>() ??
                         throw new ArgumentNullException(
                             "AuthoritySettings section is empty, invalid, or not present");
-            services.AddScoped<IUserRepository, UserRepository>()
-                .AddScoped<AuthoritySettings>(settings => authoritySettings);
+            services.AddScoped<IUserRepository, UserRepository>();
+            // .AddScoped<AuthoritySettings>(settings => authoritySettings);
+            services.Configure<AuthoritySettings>(Configuration.GetSection("AuthoritySettings"));
 
             services.AddIdentityServer(options =>
             {

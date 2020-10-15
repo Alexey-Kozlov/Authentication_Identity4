@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using System.Collections.Generic;
+using Microsoft.Extensions.Options;
 using System.Net.Http;
 using System.Linq;
 using Authentication.IdentitySettings;
@@ -34,7 +34,7 @@ namespace Authentication.Controllers
 
         public AccountController(IEventService events,
             IIdentityServerInteractionService interaction,
-            AuthoritySettings authoritySettings,
+            IOptions<AuthoritySettings> authoritySettings,
             IUserRepository userRepository,
             IActionContextAccessor accessor,
             IAuthenticationSchemeProvider schemeProvider)
@@ -42,7 +42,7 @@ namespace Authentication.Controllers
             _events = events;
             _interaction = interaction;
             _userRepository = userRepository;
-            _authoritySettings = authoritySettings;
+            _authoritySettings = authoritySettings.Value;
             _accessor = accessor;
             _schemeProvider = schemeProvider;
         }
@@ -175,10 +175,13 @@ namespace Authentication.Controllers
                             new Claim(Keywords.SessionId, result_user.Entity.SessionId.Value.ToString()),
                             new Claim(Keywords.Login, result_user.Entity.Login),
                             new Claim(Keywords.UserName, result_user.Entity.UserName),
-                            new Claim(Keywords.Roles, "")
                         }
                 };
-
+                var roles = await _userRepository.GetUserRoles(result_user.Entity.UserId.Value);
+                foreach (Role roleName in roles)
+                {
+                    isuser.AdditionalClaims.Add(new Claim(Keywords.Roles, roleName.Name));
+                }
                 await HttpContext.SignInAsync(isuser, props);
 
                 if (context != null)
