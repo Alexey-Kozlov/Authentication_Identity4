@@ -40,7 +40,7 @@ namespace Authentication.IdentitySettings
 					AbsoluteRefreshTokenLifetime = AbsoluteRefreshTokenLifetimeDefault,
 					SlidingRefreshTokenLifetime = 600,
 					ClientSecrets = { new Secret("Test".Sha256()) },
-					AllowedGrantTypes = { GrantType.ResourceOwnerPassword, GrantType.ClientCredentials, GrantType.AuthorizationCode } ,
+					AllowedGrantTypes = { GrantType.AuthorizationCode } ,
 					RedirectUris = { $"{_authoritySettings.DefaultRedirectUri}/signin-oidc", "http://localhost:56120/signin-oidc" },
 					AllowPlainTextPkce = false,
 					RequirePkce = true,
@@ -63,12 +63,14 @@ namespace Authentication.IdentitySettings
 						new Secret
 						{
 							Type = IdentityServerConstants.SecretTypes.X509CertificateBase64,
-							Value = Convert.ToBase64String(new X509Certificate2(@"C:\Certificates\WsCert.pfx").GetRawCertData())
+							Value = Convert.ToBase64String(new X509Certificate2(@"C:\Certificates\MyBase64.cer").GetRawCertData())
 						}
 					},
 					AllowedGrantTypes = GrantTypes.HybridAndClientCredentials,
-					RedirectUris = {$"https://ws-pc-70:5005/signin-oidc" },
-					AllowedScopes = { "openid","profile","api" }
+					RedirectUris = {$"https://ws-pc-70:5005/home/index" },
+					AllowedScopes = { "api" },
+					Claims = { new ClientClaim("myClaim","+100555") },
+					ClientClaimsPrefix = ""
 				}
 			};
 			return Task.FromResult(clients.Where(p => p.ClientId == clientId).FirstOrDefault());

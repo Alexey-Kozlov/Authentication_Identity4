@@ -297,9 +297,9 @@ namespace Authentication.Controllers
             var vm = new LoggedOutViewModel
             {
                 AutomaticRedirectAfterSignOut = AccountOptions.AutomaticRedirectAfterSignOut,
-                PostLogoutRedirectUri = "https://ws-pc-70:5005/home/index",
+                PostLogoutRedirectUri = $"{_authoritySettings.DefaultRedirectUri}/home/index",
                 ClientName = "Test",
-                SignOutIframeUrl = "https://ws-pc-70:5005/home/logout",
+                SignOutIframeUrl = $"{_authoritySettings.DefaultRedirectUri}/home/logout",
                 LogoutId = User.HasClaim(p => p.Type == Keywords.SubjectId)? User.GetSubjectId() : ""
             };
 
@@ -371,35 +371,6 @@ namespace Authentication.Controllers
             };
         }
 
-
-
-            //await HttpContext.SignOutAsync();
-           //return Redirect("https://ws-pc-70:5005");
-
-            //HttpClient httpClient = new HttpClient();
-            //var task =  await httpClient.GetDiscoveryDocumentAsync(_authoritySettings.AuthorityApiEndpoint);
-            //DiscoveryDocumentResponse discoveryDocument = task;
-            //var task2 = Task.Run(async () => await httpClient.RequestPasswordTokenAsync(new PasswordTokenRequest
-            //{
-            //    Address = discoveryDocument.TokenEndpoint,
-            //    ClientId = result_user.Entity.Login,
-            //    ClientSecret = result_user.Entity.UserId.ToString(),
-            //    GrantType = "password",
-            //    Password = password,
-            //    UserName = result_user.Entity.Login
-            //    //Scope = "api"
-            //}));
-            //HttpClient httpClient2 = new HttpClient();
-            //var resp = task2.Result;
-
-            //return Redirect("http://localhost:5000/home/index");
-
-            //httpClient2.SetBearerToken(resp.AccessToken);
-
-
-
-
-       
 
         private string GetReturnUrl(string clientId, string returnUrl)
         {
