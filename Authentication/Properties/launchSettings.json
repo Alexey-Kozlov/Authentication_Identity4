@@ -26,6 +26,9 @@
     "Docker": {
       "commandName": "Docker",
       "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}",
+      "environmentVariables": {
+        "\\\\wsl$": "https://*:5001"
+      },
       "publishAllPorts": true,
       "useSSL": true
     }

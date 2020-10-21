@@ -63,7 +63,7 @@ namespace Authentication.IdentitySettings
 						new Secret
 						{
 							Type = IdentityServerConstants.SecretTypes.X509CertificateBase64,
-							Value = Convert.ToBase64String(new X509Certificate2(@"C:\Certificates\MyBase64.cer").GetRawCertData())
+							Value = Convert.ToBase64String(new X509Certificate2("MyBase64.cer").GetRawCertData())
 						}
 					},
 					AllowedGrantTypes = GrantTypes.HybridAndClientCredentials,

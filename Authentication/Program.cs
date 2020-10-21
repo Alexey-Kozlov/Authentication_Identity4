@@ -30,13 +30,6 @@ namespace Authentication
                             listenOptions.HttpsOptions.SslProtocols = System.Security.Authentication.SslProtocols.Tls12;
                         });
                     });
-                    webBuilder.ConfigureKestrel(options =>
-                    {
-                        options.ConfigureHttpsDefaults(listenOptions =>
-                        {
-                            listenOptions.ServerCertificate = CertificateLoader.LoadFromStoreCert("Ws-PC-70", "Root", StoreLocation.LocalMachine, false);
-                        });
-                    });
                 });
 
         

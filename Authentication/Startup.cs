@@ -33,15 +33,14 @@ namespace Authentication
             var authoritySettings = Configuration.GetSection("AuthoritySettings").Get<AuthoritySettings>() ??
                         throw new ArgumentNullException(
                             "AuthoritySettings section is empty, invalid, or not present");
+
             services.AddScoped<IUserRepository, UserRepository>();
             services.Configure<AuthoritySettings>(Configuration.GetSection("AuthoritySettings"));
-
-            services.AddIdentityServer(options =>
-            {
-
-            })
-
-                .AddSigningCredential(CertificateLoader.LoadFromStoreCert("Ws-PC-70", "Root", StoreLocation.LocalMachine, false))
+            var cert = new X509Certificate2("WsPc70.pfx", "Test");
+            if (cert == null)
+                throw new ArgumentNullException("Certificate not found");
+            services.AddIdentityServer()
+                .AddSigningCredential(cert)
                 .AddInMemoryApiResources(Config.GetApiResources())
                 .AddInMemoryApiScopes(Config.GetApiScopes())
                 .AddInMemoryIdentityResources(Config.GetIdentityResources())
@@ -82,7 +81,6 @@ namespace Authentication
             app.UseIdentityServer();
             app.UseStaticFiles();
             app.UseRouting();
-            app.UseCookiePolicy(new CookiePolicyOptions { MinimumSameSitePolicy = Microsoft.AspNetCore.Http.SameSiteMode.Lax });
 
             app.UseEndpoints(endpoints =>
             {

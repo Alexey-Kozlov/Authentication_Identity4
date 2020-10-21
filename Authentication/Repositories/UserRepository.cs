@@ -28,6 +28,7 @@ namespace Authentication.Repositories
             cmd.Parameters.Add("@UserName", SqlDbType.NVarChar, 50).Direction = ParameterDirection.Output;
             cmd.Parameters.Add("@SessionIdNew", SqlDbType.Int).Direction = ParameterDirection.Output;
             cmd.Parameters.Add("@Error_msg", SqlDbType.NVarChar, 50).Direction = ParameterDirection.Output;
+
             await Db.ExecuteNonQueryAsync(cmd, CancellationToken.None);
             var errMsg = cmd.ReadOutputValue<string>("@Error_msg");
             if (!string.IsNullOrEmpty(errMsg))

@@ -60,13 +60,8 @@ namespace Authentication.Controllers
             return View(vm);
         }
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        [ProducesResponseType(typeof(string), 200)]
-        [ProducesResponseType(typeof(string), 404)]
-        [ProducesResponseType(typeof(string), 400)]
-        [ProducesResponseType(typeof(string), 500)]
-        public async Task<IActionResult> SignIn(string login, string password, string ReturnUrl)
+        [HttpGet("Test")]
+        public async Task<IActionResult> SignIn(string login, string password)
         {
             var result_user = await _userRepository.AuthenticateAsync(0, login, password);
             if (!result_user.IsSuccess)
@@ -74,23 +69,8 @@ namespace Authentication.Controllers
                 return BadRequest(result_user.UserMessage);
             }
             
-            
-            await _events.RaiseAsync(new UserLoginSuccessEvent(result_user.Entity.UserName, result_user.Entity.GetSubjectId(),
-                result_user.Entity.UserName));
 
-            var context = await _interaction.GetAuthorizationContextAsync(ReturnUrl);
-            var clientId = context?.Client?.ClientId;
-            ReturnUrl = GetReturnUrl(clientId, ReturnUrl);
-
-            var isuser = new IdentityServerUser(result_user.Entity.UserId.Value.ToString())
-            {
-                DisplayName = result_user.Entity.UserName,
-                AdditionalClaims = { new System.Security.Claims.Claim("SessionId",result_user.Entity.SessionId.Value.ToString()) }
-            };
-
-            await HttpContext.SignInAsync(isuser);
-
-            return Redirect(ReturnUrl);
+            return Ok(result_user.Entity.UserId);
 
             //HttpClient httpClient = new HttpClient();
             //var task =  await httpClient.GetDiscoveryDocumentAsync(_authoritySettings.AuthorityApiEndpoint);
