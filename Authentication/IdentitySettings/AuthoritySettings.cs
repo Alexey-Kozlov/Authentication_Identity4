@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace Authentication.IdentitySettings
 {
-    public class AuthoritySettings
+    public class ServiceUrls
     {
         public string AuthorityApiEndpoint { get; set; }
         public string WebApiEndpoint { get; set; }

@@ -15,13 +15,13 @@ namespace Authentication.IdentitySettings
 	public class ClientsStore : IClientStore
 	{
 		private readonly IUserRepository _userRepository;
-		private readonly AuthoritySettings _authoritySettings;
+		private readonly ServiceUrls _serviceUrls;
 		private const int AbsoluteRefreshTokenLifetimeDefault = 2592000;
 
-		public ClientsStore(IUserRepository userRepository, IOptions<AuthoritySettings> authoritySettings)
+		public ClientsStore(IUserRepository userRepository, IOptions<ServiceUrls> serviceUrls)
 		{
 			_userRepository = userRepository;
-			_authoritySettings = authoritySettings.Value;
+			_serviceUrls = serviceUrls.Value;
 		}
 
 		public  Task<Client> FindClientByIdAsync(string clientId)
@@ -41,39 +41,40 @@ namespace Authentication.IdentitySettings
 					SlidingRefreshTokenLifetime = 600,
 					ClientSecrets = { new Secret("Test".Sha256()) },
 					AllowedGrantTypes = { GrantType.AuthorizationCode } ,
-					RedirectUris = { $"{_authoritySettings.DefaultRedirectUri}/signin-oidc", "http://localhost:56120/signin-oidc" },
+					RedirectUris = { $"{_serviceUrls.DefaultRedirectUri}/signin-oidc", "http://localhost:56120/signin-oidc" },
 					AllowPlainTextPkce = false,
 					RequirePkce = true,
-					PostLogoutRedirectUris = { $"{_authoritySettings.DefaultRedirectUri}/signout-callback-oidc" },
+					PostLogoutRedirectUris = { $"{_serviceUrls.DefaultRedirectUri}/signout-callback-oidc" },
 					AllowedScopes =
 					{
 						IdentityServer4.IdentityServerConstants.StandardScopes.OpenId,
 						IdentityServer4.IdentityServerConstants.StandardScopes.Profile,
 						"api"
 					},
-					AllowedCorsOrigins = { $"{_authoritySettings.AuthorityApiEndpoint}", $"{_authoritySettings.DefaultRedirectUri}" }
-				},
-
-				new Client
-				{
-					ClientId = "Test_jwt",
-					ClientName = "Client for authentication by jwt",
-					ClientSecrets =
-					{
-						new Secret
-						{
-							Type = IdentityServerConstants.SecretTypes.X509CertificateBase64,
-							Value = Convert.ToBase64String(new X509Certificate2("MyBase64.cer").GetRawCertData())
-						}
-					},
-					AllowedGrantTypes = GrantTypes.HybridAndClientCredentials,
-					RedirectUris = {$"https://ws-pc-70:5005/home/index" },
-					AllowedScopes = { "api" },
-					Claims = { new ClientClaim("myClaim","+100555") },
-					ClientClaimsPrefix = ""
+					AllowedCorsOrigins = { $"{_serviceUrls.AuthorityApiEndpoint}", $"{_serviceUrls.DefaultRedirectUri}" }
 				}
+
+				//new Client
+				//{
+				//	ClientId = "Test_jwt",
+				//	ClientName = "Client for authentication by jwt",
+				//	ClientSecrets =
+				//	{
+				//		new Secret
+				//		{
+				//			Type = IdentityServerConstants.SecretTypes.X509CertificateBase64,
+				//			Value = Convert.ToBase64String(new X509Certificate2("MyBase64.cer").GetRawCertData())
+				//		}
+				//	},
+				//	AllowedGrantTypes = GrantTypes.HybridAndClientCredentials,
+				//	RedirectUris = {$"https://ws-pc-70:5005/home/index" },
+				//	AllowedScopes = { "api" },
+				//	Claims = { new ClientClaim("myClaim","+100555") },
+				//	ClientClaimsPrefix = ""
+				//}
 			};
-			return Task.FromResult(clients.Where(p => p.ClientId == clientId).FirstOrDefault());
+			var clnt = clients.Where(p => p.ClientId == clientId).FirstOrDefault();
+			return Task.FromResult(clnt);
 			
 		}
 	}

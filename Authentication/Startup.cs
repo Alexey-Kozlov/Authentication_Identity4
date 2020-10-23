@@ -16,6 +16,7 @@ using System.Security.Cryptography.X509Certificates;
 using Microsoft.AspNetCore.Server.Kestrel.Https;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.DataProtection;
+using System.Net.Http;
 
 namespace Authentication
 {
@@ -30,17 +31,18 @@ namespace Authentication
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddSingleton<IConfiguration>(Configuration);
-            var authoritySettings = Configuration.GetSection("AuthoritySettings").Get<AuthoritySettings>() ??
+            var serviceUrls = Configuration.GetSection("ServiceUrls").Get<ServiceUrls>() ??
                         throw new ArgumentNullException(
                             "AuthoritySettings section is empty, invalid, or not present");
 
             services.AddScoped<IUserRepository, UserRepository>();
-            services.Configure<AuthoritySettings>(Configuration.GetSection("AuthoritySettings"));
-            var cert = new X509Certificate2("WsPc70.pfx", "Test");
-            if (cert == null)
-                throw new ArgumentNullException("Certificate not found");
+            services.Configure<ServiceUrls>(Configuration.GetSection("ServiceUrls"));
+            //var cert = new X509Certificate2(Environment.GetEnvironmentVariable("ASPNETCORE_Kestrel__Certificates__Default__Path"), "Test");
+            //if (cert == null)
+            //    throw new ArgumentNullException("Certificate not found");
             services.AddIdentityServer()
-                .AddSigningCredential(cert)
+                .AddDeveloperSigningCredential()
+                //.AddSigningCredential(cert)
                 .AddInMemoryApiResources(Config.GetApiResources())
                 .AddInMemoryApiScopes(Config.GetApiScopes())
                 .AddInMemoryIdentityResources(Config.GetIdentityResources())
@@ -52,7 +54,7 @@ namespace Authentication
             services.AddAuthentication()
                 .AddJwtBearer(jwt =>
                {
-                   jwt.Authority = authoritySettings.AuthorityApiEndpoint;
+                   jwt.Authority = serviceUrls.AuthorityApiEndpoint;
                    jwt.TokenValidationParameters.ValidateAudience = true;
                    jwt.SaveToken = true;
                });
@@ -61,7 +63,7 @@ namespace Authentication
             {
                 options.AddPolicy("CorsPolicy",
                     builder => builder
-                        .WithOrigins(new[] {authoritySettings.DefaultRedirectUri })
+                        .WithOrigins(new[] { serviceUrls.DefaultRedirectUri, serviceUrls.AuthorityApiEndpoint })
                         .WithHeaders("*")
                         .WithMethods("*")
                         .AllowCredentials());
@@ -76,12 +78,14 @@ namespace Authentication
             {
                 app.UseDeveloperExceptionPage();
             }
-            app.UseHttpsRedirection();
+
             app.UseCors("CorsPolicy");
             app.UseIdentityServer();
+            app.UseHsts();
+            app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseRouting();
-
+            //app.UseCookiePolicy(new CookiePolicyOptions { MinimumSameSitePolicy = Microsoft.AspNetCore.Http.SameSiteMode.Strict });
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapDefaultControllerRoute();

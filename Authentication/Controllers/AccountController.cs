@@ -28,13 +28,13 @@ namespace Authentication.Controllers
         private readonly IEventService _events;
         private readonly IIdentityServerInteractionService _interaction;
         private readonly IUserRepository _userRepository;
-        private readonly AuthoritySettings _authoritySettings;
+        private readonly ServiceUrls _serviceUrls;
         private readonly IActionContextAccessor _accessor;
         private readonly IAuthenticationSchemeProvider _schemeProvider;
 
         public AccountController(IEventService events,
             IIdentityServerInteractionService interaction,
-            IOptions<AuthoritySettings> authoritySettings,
+            IOptions<ServiceUrls> serviceUrls,
             IUserRepository userRepository,
             IActionContextAccessor accessor,
             IAuthenticationSchemeProvider schemeProvider)
@@ -42,7 +42,7 @@ namespace Authentication.Controllers
             _events = events;
             _interaction = interaction;
             _userRepository = userRepository;
-            _authoritySettings = authoritySettings.Value;
+            _serviceUrls = serviceUrls.Value;
             _accessor = accessor;
             _schemeProvider = schemeProvider;
         }
@@ -63,14 +63,23 @@ namespace Authentication.Controllers
         [HttpGet("Test")]
         public async Task<IActionResult> SignIn(string login, string password)
         {
-            var result_user = await _userRepository.AuthenticateAsync(0, login, password);
-            if (!result_user.IsSuccess)
+            if (!string.IsNullOrEmpty(login))
             {
-                return BadRequest(result_user.UserMessage);
-            }
-            
+                var result_user = await _userRepository.AuthenticateAsync(0, login, password);
+                if (!result_user.IsSuccess)
+                {
+                    return BadRequest(result_user.UserMessage);
+                }
 
-            return Ok(result_user.Entity.UserId);
+
+                return Ok(result_user.Entity.UserId);
+            }
+            HttpClient httpClient2 = new HttpClient();
+            var response = Task.Run(async () => await httpClient2.GetAsync("http://ws-pc-70:5005/test2"));
+            var ss = response.Result;
+            var ww = Task.Run(async () => await ss.Content.ReadAsStringAsync());
+            var kk = ww.Result;
+            return Ok(kk);
 
             //HttpClient httpClient = new HttpClient();
             //var task =  await httpClient.GetDiscoveryDocumentAsync(_authoritySettings.AuthorityApiEndpoint);
@@ -277,9 +286,9 @@ namespace Authentication.Controllers
             var vm = new LoggedOutViewModel
             {
                 AutomaticRedirectAfterSignOut = AccountOptions.AutomaticRedirectAfterSignOut,
-                PostLogoutRedirectUri = $"{_authoritySettings.DefaultRedirectUri}/home/index",
+                PostLogoutRedirectUri = $"{_serviceUrls.DefaultRedirectUri}/home/index",
                 ClientName = "Test",
-                SignOutIframeUrl = $"{_authoritySettings.DefaultRedirectUri}/home/logout",
+                SignOutIframeUrl = $"{_serviceUrls.DefaultRedirectUri}/home/logout",
                 LogoutId = User.HasClaim(p => p.Type == Keywords.SubjectId)? User.GetSubjectId() : ""
             };
 
@@ -356,7 +365,7 @@ namespace Authentication.Controllers
         {
             if (clientId == null)
             {
-                return _authoritySettings.DefaultRedirectUri;
+                return _serviceUrls.DefaultRedirectUri;
             }
             return returnUrl;
         }

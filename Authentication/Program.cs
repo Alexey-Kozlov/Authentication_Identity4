@@ -24,11 +24,11 @@ namespace Authentication
                     webBuilder.UseStartup<Startup>();
                     webBuilder.UseKestrel((context, serverOptions) =>
                     {
-                        serverOptions.Configure(context.Configuration.GetSection("Kestrel"))
-                        .Endpoint("HTTPS", listenOptions =>
-                        {
-                            listenOptions.HttpsOptions.SslProtocols = System.Security.Authentication.SslProtocols.Tls12;
-                        });
+                        serverOptions.Configure(context.Configuration.GetSection("Kestrel"));
+                        //.Endpoint("HTTPS", listenOptions =>
+                        //{
+                        //    listenOptions.HttpsOptions.SslProtocols = System.Security.Authentication.SslProtocols.Tls12;
+                        //});
                     });
                 });
 
