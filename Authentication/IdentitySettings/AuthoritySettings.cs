@@ -10,5 +10,7 @@ namespace Authentication.IdentitySettings
         public string AuthorityApiEndpoint { get; set; }
         public string WebApiEndpoint { get; set; }
         public string DefaultRedirectUri { get; set; }
+        public string ExtAppRedirectUri { get; set; }
+        public string CertificateName { get; set; }
     }
 }

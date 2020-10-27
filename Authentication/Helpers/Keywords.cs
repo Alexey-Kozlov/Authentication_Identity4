@@ -10,5 +10,6 @@ namespace Authentication.Helpers
 		public const string Roles = "roles";
 		public const string SubjectId = "subjectId";
 		public const string Token = "token";
+		public const string Sub = "sub";
 	}
 }

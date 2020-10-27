@@ -37,16 +37,19 @@ namespace Authentication
 
             services.AddScoped<IUserRepository, UserRepository>();
             services.Configure<ServiceUrls>(Configuration.GetSection("ServiceUrls"));
-            //var cert = new X509Certificate2(Environment.GetEnvironmentVariable("ASPNETCORE_Kestrel__Certificates__Default__Path"), "Test");
-            //if (cert == null)
-            //    throw new ArgumentNullException("Certificate not found");
-            services.AddIdentityServer()
-                .AddDeveloperSigningCredential()
-                //.AddSigningCredential(cert)
+            var cert = new X509Certificate2(serviceUrls.CertificateName, "Test");
+            if (cert == null)
+                throw new ArgumentNullException("Certificate not found");
+            services.AddIdentityServer(options =>
+            {
+                //options.IssuerUri
+            })
+                //.AddDeveloperSigningCredential()
+                .AddSigningCredential(cert)
                 .AddInMemoryApiResources(Config.GetApiResources())
                 .AddInMemoryApiScopes(Config.GetApiScopes())
                 .AddInMemoryIdentityResources(Config.GetIdentityResources())
-                .AddResourceOwnerValidator<ResourceOwnerPasswordValidator>()
+                //.AddResourceOwnerValidator<ResourceOwnerPasswordValidator>()
                 .AddProfileService<ProfileService>()
                 .AddClientStore<ClientsStore>()
                 .AddJwtBearerClientAuthentication();
@@ -56,7 +59,9 @@ namespace Authentication
                {
                    jwt.Authority = serviceUrls.AuthorityApiEndpoint;
                    jwt.TokenValidationParameters.ValidateAudience = true;
-                   jwt.SaveToken = true;
+                   jwt.TokenValidationParameters.ValidTypes = new[] { "at+jwt" };
+                   jwt.RequireHttpsMetadata = false;
+                   jwt.SaveToken = true;                   
                });
 
             services.AddCors(options =>
@@ -78,11 +83,11 @@ namespace Authentication
             {
                 app.UseDeveloperExceptionPage();
             }
-
+            Microsoft.IdentityModel.Logging.IdentityModelEventSource.ShowPII = true;
             app.UseCors("CorsPolicy");
             app.UseIdentityServer();
-            app.UseHsts();
-            app.UseHttpsRedirection();
+            //app.UseHsts();
+            //app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseRouting();
             //app.UseCookiePolicy(new CookiePolicyOptions { MinimumSameSitePolicy = Microsoft.AspNetCore.Http.SameSiteMode.Strict });

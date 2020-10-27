@@ -41,9 +41,10 @@ namespace Authentication.IdentitySettings
 					SlidingRefreshTokenLifetime = 600,
 					ClientSecrets = { new Secret("Test".Sha256()) },
 					AllowedGrantTypes = { GrantType.AuthorizationCode } ,
-					RedirectUris = { $"{_serviceUrls.DefaultRedirectUri}/signin-oidc", "http://localhost:56120/signin-oidc" },
+					RedirectUris = { $"{_serviceUrls.DefaultRedirectUri}/signin-oidc" },
 					AllowPlainTextPkce = false,
 					RequirePkce = true,
+					RequireConsent = false,
 					PostLogoutRedirectUris = { $"{_serviceUrls.DefaultRedirectUri}/signout-callback-oidc" },
 					AllowedScopes =
 					{
@@ -52,27 +53,32 @@ namespace Authentication.IdentitySettings
 						"api"
 					},
 					AllowedCorsOrigins = { $"{_serviceUrls.AuthorityApiEndpoint}", $"{_serviceUrls.DefaultRedirectUri}" }
+				},
+
+				new Client
+				{
+                    ClientId = "Test_jwt",
+                    ClientName = "Client for authentication by jwt",
+                    ClientSecrets =
+                    {
+                        new Secret
+                        {
+                            Type = IdentityServerConstants.SecretTypes.X509CertificateBase64,
+                            Value = Convert.ToBase64String(new X509Certificate2("MyBase64.cer").GetRawCertData())
+                        }
+                    },
+                    AllowedGrantTypes = GrantTypes.HybridAndClientCredentials,
+                    RedirectUris = {$"{_serviceUrls.ExtAppRedirectUri}/signin-oidc" },
+					PostLogoutRedirectUris = { $"{_serviceUrls.ExtAppRedirectUri}/signout-callback-oidc" },
+					AllowedScopes = { "openid", "profile", "api" },
+					RequirePkce = true,
+					RequireConsent = false,
+					Claims = { new ClientClaim("myClaim","+100555") },
+                    ClientClaimsPrefix = "",
+					AllowedCorsOrigins = { $"{_serviceUrls.AuthorityApiEndpoint}", $"{_serviceUrls.ExtAppRedirectUri}" }
 				}
 
-				//new Client
-				//{
-				//	ClientId = "Test_jwt",
-				//	ClientName = "Client for authentication by jwt",
-				//	ClientSecrets =
-				//	{
-				//		new Secret
-				//		{
-				//			Type = IdentityServerConstants.SecretTypes.X509CertificateBase64,
-				//			Value = Convert.ToBase64String(new X509Certificate2("MyBase64.cer").GetRawCertData())
-				//		}
-				//	},
-				//	AllowedGrantTypes = GrantTypes.HybridAndClientCredentials,
-				//	RedirectUris = {$"https://ws-pc-70:5005/home/index" },
-				//	AllowedScopes = { "api" },
-				//	Claims = { new ClientClaim("myClaim","+100555") },
-				//	ClientClaimsPrefix = ""
-				//}
-			};
+            };
 			var clnt = clients.Where(p => p.ClientId == clientId).FirstOrDefault();
 			return Task.FromResult(clnt);
 			

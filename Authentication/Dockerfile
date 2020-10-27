@@ -14,6 +14,8 @@ ENV ConnectionStrings__TestDb="Data Source=172.20.0.2;Database=Identity;User Id=
 ENV ServiceUrls__AuthorityApiEndpoint="http://ws-pc-70:5001"
 ENV ServiceUrls__WebApiEndpoint="http://ws-pc-70:5007"
 ENV ServiceUrls__DefaultRedirectUri="http://ws-pc-70:5005"
+ENV ServiceUrls__ExtAppRedirectUri="http://ws-pc-70:5008"
+ENV ServiceUrls__CertificateName="WsPc70.pfx"
 
 FROM mcr.microsoft.com/dotnet/core/sdk:3.1-buster AS build
 WORKDIR /src
@@ -32,7 +34,8 @@ FROM build AS publish
 RUN dotnet publish "Authentication.csproj" -c Release -o /app
 
 
-#COPY ["*.pfx", "/app"]
+COPY ["WsPc70.pfx", "/app/WsPc70.pfx"]
+COPY ["MyBase64.cer", "/app/MyBase64.cer"]
 #RUN update-ca-certificates
 
 FROM base AS final

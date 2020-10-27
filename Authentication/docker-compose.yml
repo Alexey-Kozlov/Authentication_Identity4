@@ -1,0 +1,71 @@
+version: '3.8'
+services:
+    auth:        
+        build: .\Authentication\Authentication
+        image: auth
+        container_name: auth
+        restart: always
+        hostname: ws-pc-70
+        ports:
+            - 5001:5001
+        networks:
+            auth:
+                ipv4_address: 172.20.0.4
+        extra_hosts:
+            - ws-pc-70:172.20.0.3
+    front:
+        build: .\Front_Identity4\Front
+        image: front
+        container_name: front
+        restart: always
+        hostname: ws-pc-70
+        depends_on:
+            - auth
+            - webapi
+        ports:
+            - 5005:5005
+        networks:
+            auth:
+                ipv4_address: 172.20.0.3
+        extra_hosts:
+            - ws-pc-70:172.20.0.4
+            - ws-pc-70:172.20.0.5
+    front_jwt:
+        build: .\Front_jwt\Front
+        image: front_jwt
+        container_name: front_jwt
+        restart: always
+        hostname: ws-pc-70
+        depends_on:
+            - auth
+            - webapi
+        ports:
+            - 5008:5008
+        networks:
+            auth:
+                ipv4_address: 172.20.0.6
+        extra_hosts:
+            - ws-pc-70:172.20.0.4
+            - ws-pc-70:172.20.0.5
+    webapi:
+        build: .\WebApi\WebApi
+        image: webapi
+        container_name: webapi
+        restart: always
+        hostname: ws-pc-70
+        depends_on:
+            - auth
+        ports:
+            - 5007:5007
+        networks:
+            auth:
+                ipv4_address: 172.20.0.5
+        extra_hosts:
+            - ws-pc-70:172.20.0.3
+            - ws-pc-70:172.20.0.4
+networks:
+    auth:
+        external: true
+
+
+    

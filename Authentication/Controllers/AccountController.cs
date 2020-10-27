@@ -171,6 +171,7 @@ namespace Authentication.Controllers
                 {
                     isuser.AdditionalClaims.Add(new Claim(Keywords.Roles, roleName.Name));
                 }
+
                 await HttpContext.SignInAsync(isuser, props);
 
                 if (context != null)
